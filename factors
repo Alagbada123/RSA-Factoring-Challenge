@@ -1,28 +1,49 @@
-import sys
-from math import sqrt
+#!/usr/bin/env bash
+# is a factors challenge
 
-def factorize(n):
-    for i in range(2, int(sqrt(n)) + 1):
-        if n % i == 0:
-            return i, n // i
-    return n, 1
+check_factor()
+{
+if [ $# -ne 3 ];
+        then
+                args=("$@")
+                count=0
+                num2=1
+                for a in ${args[*]};
+                do
+                        if [ $count -gt 1 ];
+                        then
+                                num2=$(echo $a*$num2 | bc)
+                        fi
+                        count=$((count + 1))
+                done
+        else
+                num2=$3
+        fi
 
-def main(filename):
-    try:
-        with open(filename, 'r') as file:
-            for line in file:
-                n = int(line.strip())
-                p, q = factorize(n)
-                print(f"{n}={p}*{q}")
-    except FileNotFoundError:
-        print(f"Error: File '{filename}' not found.")
-        sys.exit(1)
-    except ValueError:
-        print(f"Error: Invalid number in the file.")
-        sys.exit(1)
+        num1=$2
+        num=$(echo "$1" | tr ':' '=')
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: factors <file>")
-        sys.exit(1)
-    main(sys.argv[1])
+        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
+       if ((result == 1)); then
+       numcp=$num1
+       num1=$num2
+       num2=$numcp
+                fi
+
+        echo "$num$num1*$num2"
+}
+
+if [ $# -ne 1 ]
+then
+        echo 'Usage: factors <file>'
+        exit 1
+else
+
+        while read i
+        do
+
+                result=$(factor "$i")
+                check_factor $result
+
+        done < "$1"
+fi
